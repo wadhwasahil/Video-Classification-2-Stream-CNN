@@ -30,7 +30,7 @@ ydl_opts = {
 }
 os.chdir('../videos/train')
 count=0
-with open('../dataset/trainVidID.txt') as f:
+with open('../../dataset/trainVidID.txt') as f:
 	for i,vidId in enumerate(f):
 		vidId=vidId[:-1]
 		ydl_opts['outtmpl']=vidId+''
@@ -43,7 +43,7 @@ with open('../dataset/trainVidID.txt') as f:
 
 os.chdir('../videos/test')
 count=0
-with open('../dataset/testVidID.txt') as f:
+with open('../../dataset/testVidID.txt') as f:
 	for i,vidId in enumerate(f):
 		vidId=vidId[:-1]
 		ydl_opts['outtmpl']=vidId+''

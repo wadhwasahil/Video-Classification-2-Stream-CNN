@@ -66,5 +66,5 @@ def getOpticalFlow(filename,label):
 
 
 
-f='./sample_videos/b.mp4'
+f='./sample_videos/j.avi'
 getOpticalFlow(f,1)
