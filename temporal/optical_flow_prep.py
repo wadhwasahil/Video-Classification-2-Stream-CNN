@@ -24,8 +24,14 @@ def getOpticalFlow(X_data_storage,Y_data_storage,filename,label):
 		next = cv2.cvtColor(frame2,cv2.COLOR_BGR2GRAY)
 
 		flow = cv2.calcOpticalFlowFarneback(prvs,next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
-		fx.append(flow[:,:,0])
-		fy.append(flow[:,:,1])
+
+		horz = cv2.normalize(flow[...,0], None, 0, 255, cv2.NORM_MINMAX)
+		vert = cv2.normalize(flow[...,1], None, 0, 255, cv2.NORM_MINMAX)
+		horz = horz.astype('uint8')
+		vert = vert.astype('uint8')
+
+		fx.append(horz)
+		fy.append(vert)
 		count+=1
 		if count == 10:
 			flowX = np.dstack((fx[0],fx[1],fx[2],fx[3],fx[4],fx[5],fx[6],fx[7],fx[8],fx[9]))
@@ -65,8 +71,11 @@ def getOpticalFlow(X_data_storage,Y_data_storage,filename,label):
 	inputVec=np.rollaxis(inputVec,3,1)
 
 	labels=np.tile(label,(inputVec.shape[0],1))
+	labels = labels.astype('uint8')
+
 	print inputVec.shape
 	print labels.shape
+
 	X_data_storage.append(inputVec)
 	Y_data_storage.append(labels)
 
