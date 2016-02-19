@@ -1,6 +1,7 @@
 from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
+from keras.layers.recurrent import LSTM
 from keras.optimizers import SGD
 import cv2, numpy as np
 
@@ -48,7 +49,6 @@ def VGG_16(weights_path=None):
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(1000, activation='softmax'))
-
     if weights_path:
         model.load_weights(weights_path)
 
@@ -67,4 +67,5 @@ if __name__ == "__main__":
     sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='categorical_crossentropy')
     out = model.predict(im)
-    print np.argmax(out)
+    c = np.argmax(out)
+    print c
