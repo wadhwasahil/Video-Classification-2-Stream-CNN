@@ -2,6 +2,7 @@ import sys,os
 from PIL import Image, ImageFilter
 import numpy as np
 import h5py
+import tables
 import gc
 
 from keras.preprocessing.image import ImageDataGenerator
@@ -14,15 +15,22 @@ from six.moves import range
 from keras.layers.normalization import BatchNormalization
 
 def getData():
-	return (X_train,Y_train,X_test,Y_test)
+	hdf5_path = "../dataset/training_data_final.hdf5"
+	hdf5_file = tables.openFile(hdf5_path, mode='r')
+	x1=hdf5_file.root.X_train
+	y1=hdf5_file.root.Y_train
+	x2=x1[-100:]
+	y2=y1[-100:]
+	x1=x1[:x1.shape[0]-100]
+	y1=y1[:y1.shape[0]-100]
+	return (x1,y1,x2,y2)
 
 def CNN(X_train,Y_train,X_test,Y_test):
-
 	input_frames=10
 	batch_size = 32
-	nb_classes = 11
+	nb_classes = 20
 	nb_epoch = 200
-	img_rows, img_cols = 256,256
+	img_rows, img_cols = 150,150
 	img_channels = 2*input_frames
 
 	print 'Readying vectors...'
@@ -30,8 +38,8 @@ def CNN(X_train,Y_train,X_test,Y_test):
 
 	X_train = X_train.astype("float16",copy=False)
 	X_test = X_test.astype("float16",copy=False)
-	# X_train /= 255
-	# X_test /= 255
+	X_train /= 255
+	X_test /= 255
 
 	print X_train.shape
 	print X_test.shape
@@ -69,7 +77,7 @@ def CNN(X_train,Y_train,X_test,Y_test):
 	graph.add_node(MaxPooling2D(pool_size=(2, 2)),name='pool3',input='act5')
 
 	graph.add_node(Flatten(),name='flat',input='pool3')
-	graph.add_node(Dense(4096),name='fc1',input='flat')
+	graph.add_node(Dense(2048),name='fc1',input='flat')
 	graph.add_node(Activation('relu'),name='act6',input='fc1')
 	graph.add_node(Dropout(0.5),name='drop1',input='act6')
 	graph.add_node(Dense(2048),name='fc2',input='drop1')

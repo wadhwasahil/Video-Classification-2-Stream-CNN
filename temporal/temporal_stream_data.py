@@ -1,34 +1,29 @@
 import numpy as np
-import optical_flow_prep as ofp
 import sys,os
-import tables
 import pickle
-from datetime import datetime
 
-startTime = datetime.now()
+def data_prep():
+	with open('../dataset/frame_count.pickle','rb') as f:
+		frame_count=pickle.load(f)
+	root = './optical_flow_images'
+	path = os.path.join(root, '')
+	data={}
 
+	for path, subdirs, files in os.walk(root):
+		for filename in files:
+			fc=frame_count[filename.split('_')[1].split('.')[0]]
+			for i,j in enumerate(train_data[filename.split('_')[1].split('.')[0]]):
+				if j:
+					index=i
+					break
+			for i in range(1,(fc/10)+1):
+				data[filename+'_'+str(i)]=index+1
+	with open('../dataset/temporal_train_data.pickle','wb') as f2:
+		pickle.dump(data,f2)
+			
 
-root = "../videos"
-path = os.path.join(root, "train")
-count=0
+def vectorize():
+	pass
 
-with open('../dataset/train_data.pickle','rb') as f3:
-	train_data=pickle.load(f3)
-
-
-hdf5_path = "../dataset/training_data_final.hdf5"
-hdf5_file = tables.openFile(hdf5_path, mode='w')
-atom = tables.UInt8Atom()
-X_data_storage = hdf5_file.createEArray(hdf5_file.root, 'X_train',atom,shape=(0,20,224,224),expectedrows=200)
-Y_data_storage = hdf5_file.createEArray(hdf5_file.root, 'Y_train',atom,shape=(0,20),expectedrows=200)
-
-for path, subdirs, files in os.walk(root):
-	for filename in files:
-		count+=1
-		if count>3:
-			print datetime.now() - startTime
-			sys.exit()
-		label=train_data[filename]
-		ofp.getOpticalFlow(X_data_storage,Y_data_storage,path+'/'+filename,label)
-print datetime.now() - startTime
-hdf5_file.close()
+if __name__ == "__main__":
+	data_prep()
