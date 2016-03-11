@@ -30,7 +30,7 @@ def CNN(X_train,Y_train,X_test,Y_test):
 	batch_size = 32
 	nb_classes = 20
 	nb_epoch = 200
-	img_rows, img_cols = 150,150
+	img_rows, img_cols = 224,224
 	img_channels = 2*input_frames
 
 	print 'Readying vectors...'

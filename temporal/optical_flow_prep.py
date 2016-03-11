@@ -1,32 +1,39 @@
 import cv2
 import numpy as np
+import pickle
+from PIL import Image
 
-def stackOpticalFlow(filename,w,h,label):
-	pass
-	# firstTime=1
-	# fx = []
-	# fy = []
-	# fx.append(horz)
-	# fy.append(vert)
-	# count+=1
-	# if count == 10:
-	# 	flowX = np.dstack((fx[0],fx[1],fx[2],fx[3],fx[4],fx[5],fx[6],fx[7],fx[8],fx[9]))
-	# 	flowY = np.dstack((fy[0],fy[1],fy[2],fy[3],fy[4],fy[5],fy[6],fy[7],fy[8],fy[9]))
-	# 	inp = np.dstack((flowX,flowY))
-	# 	inp = np.expand_dims(inp, axis=0)
-	# 	if not firstTime:
-	# 		inputVec = np.concatenate((inputVec,inp))
-	# 	else:
-	# 		inputVec = inp
-	# 		firstTime = 0
+def stackOpticalFlow(blocks,temporal_train_data):
+	path = './optical_flow_images'
+	firstTime=1
 
-	# 	count = 0
-	# 	fx = []
-	# 	fy = []
+	with open('../dataset/train_data.pickle','rb') as f:
+		train_data=pickle.load(f)
 
-	# inputVec=np.rollaxis(inputVec,3,1)
-	# labels=np.tile(label,(inputVec.shape[0],1))
-	# labels = labels.astype('uint8')
+	for block in blocks:
+		fx = []
+		fy = []
+		filename,blockNo=blocks.split('_')
+		for i in range((blockNo*10)-9,(blockNo*10)+1):
+			imgH=Image.open(path+'/'+'h'+i+'_'+filename+'jpg')
+			imgV=Image.open(path+'/'+'v'+i+'_'+filename+'jpg')
+			fx.append(imgH)
+			fy.append(imgV)
+		flowX = np.dstack((fx[0],fx[1],fx[2],fx[3],fx[4],fx[5],fx[6],fx[7],fx[8],fx[9]))
+		flowY = np.dstack((fy[0],fy[1],fy[2],fy[3],fy[4],fy[5],fy[6],fy[7],fy[8],fy[9]))
+		inp = np.dstack((flowX,flowY))
+		inp = np.expand_dims(inp, axis=0)
+		if not firstTime:
+			inputVec = np.concatenate((inputVec,inp))
+		else:
+			inputVec = inp
+			firstTime = 0
+
+	inputVec=np.rollaxis(inputVec,3,1)
+	label=train_data[filename]
+	labels=np.tile(label,(inputVec.shape[0],1))
+
+	return (inputVec,labels)
 
 def writeOpticalFlow(path,filename,w,h,c):
 	cap = cv2.VideoCapture(path+'/'+filename)

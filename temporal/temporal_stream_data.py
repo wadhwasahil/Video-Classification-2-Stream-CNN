@@ -1,29 +1,18 @@
 import numpy as np
 import sys,os
 import pickle
+import optical_flow_prep as ofp
 
-def data_prep():
-	with open('../dataset/frame_count.pickle','rb') as f:
-		frame_count=pickle.load(f)
-	root = './optical_flow_images'
-	path = os.path.join(root, '')
-	data={}
+def chunks(l, n):
+	"""Yield successive n-sized chunks from l."""
+	for i in xrange(0, len(l), n):
+		yield l[i:i+n]
 
-	for path, subdirs, files in os.walk(root):
-		for filename in files:
-			fc=frame_count[filename.split('_')[1].split('.')[0]]
-			for i,j in enumerate(train_data[filename.split('_')[1].split('.')[0]]):
-				if j:
-					index=i
-					break
-			for i in range(1,(fc/10)+1):
-				data[filename+'_'+str(i)]=index+1
-	with open('../dataset/temporal_train_data.pickle','wb') as f2:
-		pickle.dump(data,f2)
-			
+def stackOF():
+	chunk_size=5000
 
-def vectorize():
-	pass
+	with open('../dataset/temporal_train_data.pickle','rb') as f1:
+		temporal_train_data=pickle.load(f1)
 
-if __name__ == "__main__":
-	data_prep()
+	blocks=chunks(temporal_train_data.keys(),chunk_size)
+	X_train,Y_train=ofp.stackOpticalFlow(blocks,temporal_train_data)
