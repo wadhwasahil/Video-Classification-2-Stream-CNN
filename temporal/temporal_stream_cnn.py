@@ -4,9 +4,10 @@ import numpy as np
 import h5py
 import tables
 import gc
+import temporal_stream_data as tsd
 
 from keras.preprocessing.image import ImageDataGenerator
-from keras.models import Graph
+from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation, Flatten
 from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from keras.optimizers import SGD, Adadelta, Adagrad
@@ -14,16 +15,13 @@ from keras.utils import np_utils, generic_utils
 from six.moves import range
 from keras.layers.normalization import BatchNormalization
 
-def getData():
-	hdf5_path = "../dataset/training_data_final.hdf5"
-	hdf5_file = tables.openFile(hdf5_path, mode='r')
-	x1=hdf5_file.root.X_train
-	y1=hdf5_file.root.Y_train
-	x2=x1[-100:]
-	y2=y1[-100:]
-	x1=x1[:x1.shape[0]-100]
-	y1=y1[:y1.shape[0]-100]
-	return (x1,y1,x2,y2)
+def getTrainData():
+	train=tsd.stackOF()
+	for X_train,Y_train in train:
+		yield (X_train,Y_train)
+
+def getTestData():
+
 
 def CNN(X_train,Y_train,X_test,Y_test):
 	input_frames=10
@@ -49,52 +47,87 @@ def CNN(X_train,Y_train,X_test,Y_test):
 	print 'Preparing architecture...'
 
 
-	graph = Graph()
+	model = Sequential()
 
-	graph.add_input(name='input1',input_shape=(img_channels, img_rows, img_cols))
+	model.add(Convolution2D(96, 7, 7, border_mode='same',input_shape=(img_channels, img_rows, img_cols)))
+	model.add(BatchNormalization())
+	model.add(Activation('relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
 
-	graph.add_node(Convolution2D(96, 7, 7, border_mode='same'),name='conv1',input='input1')
-	graph.add_node(BatchNormalization(),name='norm1',input='conv1')
-	graph.add_node(Activation('relu'),name='act1',input='norm1')
-	graph.add_node(MaxPooling2D(pool_size=(2, 2)),name='pool1',input='act1')
+	model.add(Convolution2D(256, 5, 5, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(Activation('relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
 
-	graph.add_node(Convolution2D(256, 5, 5, border_mode='same'),name='conv2',input='pool1')
-	graph.add_node(BatchNormalization(),name='norm2',input='conv2')
-	graph.add_node(Activation('relu'),name='act2',input='norm2')
-	graph.add_node(MaxPooling2D(pool_size=(2, 2)),name='pool2',input='act2')
+	model.add(Convolution2D(512, 3, 3, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(Activation('relu'))
 
-	graph.add_node(Convolution2D(512, 3, 3, border_mode='same'),name='conv3',input='pool2')
-	graph.add_node(BatchNormalization(),name='norm3',input='conv3')
-	graph.add_node(Activation('relu'),name='act3',input='norm3')
+	model.add(Convolution2D(512, 3, 3, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(Activation('relu'))
 
-	graph.add_node(Convolution2D(512, 3, 3, border_mode='same'),name='conv4',input='act3')
-	graph.add_node(BatchNormalization(),name='norm4',input='conv4')
-	graph.add_node(Activation('relu'),name='act4',input='norm4')
+	model.add(Convolution2D(512, 3, 3, border_mode='same'))
+	model.add(BatchNormalization())
+	model.add(Activation('relu'))
+	model.add(MaxPooling2D(pool_size=(2, 2)))
 
-	graph.add_node(Convolution2D(512, 3, 3, border_mode='same'),name='conv5',input='act4')
-	graph.add_node(BatchNormalization(),name='norm5',input='conv5')
-	graph.add_node(Activation('relu'),name='act5',input='norm5')
-	graph.add_node(MaxPooling2D(pool_size=(2, 2)),name='pool3',input='act5')
+	model.add(Flatten())
+	model.add(Dense(2048))
+	model.add(Activation('relu'))
+	model.add(Dropout(0.5))
+	model.add(Dense(2048))
+	model.add(Activation('relu'))
+	model.add(Dropout(0.5))
 
-	graph.add_node(Flatten(),name='flat',input='pool3')
-	graph.add_node(Dense(2048),name='fc1',input='flat')
-	graph.add_node(Activation('relu'),name='act6',input='fc1')
-	graph.add_node(Dropout(0.5),name='drop1',input='act6')
-	graph.add_node(Dense(2048),name='fc2',input='drop1')
-	graph.add_node(Activation('relu'),name='act7',input='fc2')
-	graph.add_node(Dropout(0.5),name='drop2',input='act7')
+	model.add(Dense(nb_classes))
+	model.add(Activation('softmax'))
 
-	graph.add_node(Dense(nb_classes),name='out',input='drop2')
-	graph.add_node(Activation('softmax'),name='soft',input='out')
-	graph.add_output(name='output1',input='soft')
+
 
 	print 'Starting with training...'
 	gc.collect()
 	sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-	graph.compile(loss={'output1':'categorical_crossentropy'}, optimizer=sgd)
-	history = graph.fit({'input1':X_train, 'output1':Y_train},nb_epoch=nb_epoch,batch_size=batch_size,verbose=1)
-	score = graph.evaluate({'input1':X_test, 'output1':Y1_test}, batch_size=batch_size)
-	print score
+	model.compile(loss={'output1':'categorical_crossentropy'}, optimizer=sgd)
 
-data=getData()
-CNN(data[0],data[1],data[2],data[3])
+	print("Using real time data augmentation")
+
+	datagen = ImageDataGenerator(
+		featurewise_center=True,  # set input mean to 0 over the dataset
+		samplewise_center=False,  # set each sample mean to 0
+		featurewise_std_normalization=True,  # divide inputs by std of the dataset
+		samplewise_std_normalization=False,  # divide each input by its std
+		zca_whitening=False,  # apply ZCA whitening
+		rotation_range=20,  # randomly rotate images in the range (degrees, 0 to 180)
+		width_shift_range=0.2,  # randomly shift images horizontally (fraction of total width)
+		height_shift_range=0.2,  # randomly shift images vertically (fraction of total height)
+		horizontal_flip=True,  # randomly flip images
+		vertical_flip=True)  # randomly flip images
+
+	# compute quantities required for featurewise normalization
+	# (std, mean, and principal components if ZCA whitening is applied)
+	datagen.fit(X_sample)
+
+	for e in range(nb_epoch):
+		print('-'*40)
+		print('Epoch', e)
+		print('-'*40)
+		print("Training...")
+		# batch train with realtime data augmentation
+		progbar = generic_utils.Progbar(X_train.shape[0])
+		for X_train, Y_train in getTrainData():
+			for X_batch, Y_batch in datagen.flow(X_train, Y_train, batch_size=batch_size):
+				loss = model.train_on_batch(X_batch, Y_batch, accuracy=True)
+				progbar.add(X_batch.shape[0], values=[("train loss", loss[0]),("train accuracy", loss[1])])
+
+		print("Testing...")
+		# test time!
+		progbar = generic_utils.Progbar(X_test.shape[0])
+		for X_test, Y_test in getTestData():
+			for X_batch, Y_batch in datagen.flow(X_test, Y_test, batch_size=batch_size):
+				score = model.test_on_batch(X_batch, Y_batch, accuracy=True)
+				progbar.add(X_batch.shape[0], values=[("test loss", score[0]),("test accuracy", score[1])])
+
+
+if __name__ == "__main__":
+	CNN(data[0],data[1],data[2],data[3])
