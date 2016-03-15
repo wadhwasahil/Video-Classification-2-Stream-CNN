@@ -18,12 +18,14 @@ from keras.layers.normalization import BatchNormalization
 def getTrainData():
 	train=tsd.stackOF()
 	for X_train,Y_train in train:
+		X_train /= 255
 		yield (X_train,Y_train)
 
-def getTestData():
+def getTrainData():
+	
 
 
-def CNN(X_train,Y_train,X_test,Y_test):
+def CNN():
 	input_frames=10
 	batch_size = 32
 	nb_classes = 20
@@ -31,21 +33,12 @@ def CNN(X_train,Y_train,X_test,Y_test):
 	img_rows, img_cols = 224,224
 	img_channels = 2*input_frames
 
-	print 'Readying vectors...'
-	gc.collect()
+	print 'X_sample: '+str(X_sample.shape)
+	print 'X_test: '+str(X_test.shape)
+	print 'Y_test: '+str(Y_test.shape)
 
-	X_train = X_train.astype("float16",copy=False)
-	X_test = X_test.astype("float16",copy=False)
-	X_train /= 255
-	X_test /= 255
-
-	print X_train.shape
-	print X_test.shape
-	print Y_train.shape
-	print Y_test.shape
 
 	print 'Preparing architecture...'
-
 
 	model = Sequential()
 
@@ -130,4 +123,4 @@ def CNN(X_train,Y_train,X_test,Y_test):
 
 
 if __name__ == "__main__":
-	CNN(data[0],data[1],data[2],data[3])
+	CNN()
