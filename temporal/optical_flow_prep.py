@@ -13,7 +13,7 @@ def stackOpticalFlow(blocks,temporal_train_data):
 	for block in blocks:
 		fx = []
 		fy = []
-		filename,blockNo=blocks.split('_')
+		filename,blockNo=block.split('_')
 		for i in range((blockNo*10)-9,(blockNo*10)+1):
 			imgH=Image.open(path+'/'+'h'+i+'_'+filename+'jpg')
 			imgV=Image.open(path+'/'+'v'+i+'_'+filename+'jpg')

@@ -19,9 +19,22 @@ def writeOF():
 			c+=1
 			count=ofp.writeOpticalFlow(path,filename,w,h,c)
 			data[filename]=count
+
+	root = "../videos"
+	path = os.path.join(root, "test")
+	w=224
+	h=224
+	data={}
+
+	for path, subdirs, files in os.walk(root):
+		for filename in files:
+			c+=1
+			count=ofp.writeOpticalFlow(path,filename,w,h,c)
+			data[filename]=count
+
 	with open('../dataset/frame_count.pickle','wb') as f:
 		pickle.dump(data,f)
-	print 'Time taken for '+str(c)+'videos: '+str(datetime.now() - startTime)
+	print 'Time taken for '+str(c)+'testing videos: '+str(datetime.now() - startTime)
 
 
 def data_prep():
