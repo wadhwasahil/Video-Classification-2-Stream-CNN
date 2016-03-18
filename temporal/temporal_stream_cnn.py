@@ -22,7 +22,12 @@ def getTrainData():
 		yield (X_train,Y_train)
 
 def getTrainData():
-	
+	pass
+
+def get_activations(model, layer, X_batch):
+    get_activations = theano.function([model.layers[0].input], model.layers[layer].get_output(train=False), allow_input_downcast=True)
+    activations = get_activations(X_batch) # same result as above
+    return activations
 
 
 def CNN():
@@ -67,14 +72,16 @@ def CNN():
 
 	model.add(Flatten())
 	model.add(Dense(2048))
-	model.add(Activation('relu'))
+	fc_output=Activation('relu')
+	model.add(fc_output)
 	model.add(Dropout(0.5))
 	model.add(Dense(2048))
 	model.add(Activation('relu'))
 	model.add(Dropout(0.5))
 
 	model.add(Dense(nb_classes))
-	model.add(Activation('softmax'))
+	softmax_output=Activation('softmax')
+	model.add(softmax_output)
 
 
 
@@ -112,6 +119,18 @@ def CNN():
 			for X_batch, Y_batch in datagen.flow(X_train, Y_train, batch_size=batch_size):
 				loss = model.train_on_batch(X_batch, Y_batch, accuracy=True)
 				progbar.add(X_batch.shape[0], values=[("train loss", loss[0]),("train accuracy", loss[1])])
+				fc_output
+				softmax_output
+
+		print('Saving layer representation and saving weights...')
+
+		with h5py.File('fc_output.h5', 'w') as hf:
+			hf.create_dataset('fc_output', data=fc_output)
+
+		with h5py.File('softmax_output.h5', 'w') as hf:
+			hf.create_dataset('softmax_output', data=softmax_output)
+
+		model.save_weights('temporal_stream_model.h5')
 
 		print("Testing...")
 		# test time!
