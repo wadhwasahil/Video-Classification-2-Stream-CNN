@@ -49,13 +49,14 @@ def VGG_16(weights_path=None):
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(1000, activation='softmax'))
+    
     if weights_path:
         model.load_weights(weights_path)
 
     return model
 
 if __name__ == "__main__":
-    im = cv2.resize(cv2.imread('cat.jpg'), (224, 224)).astype(np.float32)
+    im = cv2.resize(cv2.imread('dog.jpg'), (224, 224)).astype(np.float32)
     im[:,:,0] -= 103.939
     im[:,:,1] -= 116.779
     im[:,:,2] -= 123.68

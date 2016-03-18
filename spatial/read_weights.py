@@ -1,5 +1,4 @@
 # This program reads the weights from a hd5 file
-
 import h5py
 import numpy as np
 import theano
@@ -12,4 +11,5 @@ cnt  = 0
 #         weights = [g['param_{}'.format(p)] for p in range(g.attrs['nb_params'])]
 #         cnt = cnt + 1
 data = f['/']['layer_1']['param_0']
-print np.array(data)
+data  = np.array(data).astype('float32')
+print np.shape(data)
