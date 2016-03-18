@@ -24,7 +24,6 @@ def writeOF():
 	path = os.path.join(root, "test")
 	w=224
 	h=224
-	data={}
 
 	for path, subdirs, files in os.walk(root):
 		for filename in files:
