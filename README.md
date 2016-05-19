@@ -11,3 +11,29 @@ For more information, see these papers:
 [Modeling Spatial-Temporal Clues in a Hybrid Deep Learning Framework for Video Classification](http://arxiv.org/pdf/1504.01561v1.pdf)
 
 [Towards Good Practices for Very Deep Two-Stream ConvNets](http://arxiv.org/pdf/1507.02159v1.pdf)
+
+***
+
+Here are the steps to run the project on CCV dataset:
+
+1. Get the YouTube data, remove broken videos and negative instances and finally create a pickle file of the dataset by running scripts from the utility_scripts folder
+
+
+2. Temporal Stream (in the temporal folder):
+  1. Run temporal_vid2img to create optical flow frames and the related files
+  2. Run temporal_stream_cnn to start with the temporal stream training
+
+
+3. Spatial Stream (in the spatial folder):
+  1. Run the spatial_vid2img to create static frames and related files
+  2. Download the vgg16_weights.h5 file from [here](https://gist.github.com/baraldilorenzo/07d7802847aaad0a35d3) and put it in the spatial folder
+
+  3. Run spatial_stream_cnn to start with the spatial stream training
+
+4. Temporal Stream LSTM: 
+Will soon update the code
+
+5. Spatial Stream LSTM: 
+Will soon update the code
+
+***
