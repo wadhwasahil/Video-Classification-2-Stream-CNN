@@ -75,7 +75,7 @@ def writeOpticalFlow(path,filename,w,h,c):
 				frame2 = cv2.resize(frame2, (w,h))
 				next = cv2.cvtColor(frame2,cv2.COLOR_BGR2GRAY)
 
-				flow = cv2.calcOpticalFlowFarneback(prvs,next, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+				flow = cv2.calcOpticalFlowFarneback(prvs,next, 0.5, 3, 15, 3, 5, 1.2, 0)
 
 				horz = cv2.normalize(flow[...,0], None, 0, 255, cv2.NORM_MINMAX)
 				vert = cv2.normalize(flow[...,1], None, 0, 255, cv2.NORM_MINMAX)
