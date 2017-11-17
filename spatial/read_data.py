@@ -2,6 +2,7 @@ import cv2
 import pickle
 import numpy as np
 
+
 def get_sample_data(chunk, img_row, img_col):
     X_train = []
     Y_train = []
