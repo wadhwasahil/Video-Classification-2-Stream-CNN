@@ -23,7 +23,7 @@ First create a directory named env and then run the following inside the directo
 `$ cd env`
 `$ virtualenv venv-video-classification `
 `$ source  env-video-classification\bin\activate`
-`$ cd ..
+`$ cd ..`
 `$ pip install requirements.txt` 
 
 
